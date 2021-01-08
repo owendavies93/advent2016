@@ -7,35 +7,27 @@ object Day5 {
     val digest = MessageDigest.getInstance("MD5")
 
     def main(args: Array[String]) {
-        println(part2())
+        println(part1(1, Array[Char]()))
+        println(part2(1, Array.fill(8)('_')))
     }
 
-    def part1(): String = {
-        var start = 1
-
-        return (1 to 8).map(i => {
-            val (res, ch, _) = findZeroHashChar("wtnhxymk", start)
-            start = res
-            ch
-        }).mkString
-    }
-
-    def part2(): String = {
-        var start = 1
-        var out = List.fill(8)('_').mkString
-
-        // So imperative yuck!
-        while (out.filter(_ == '_').size > 0) {
-            val (res, index, ch) = findZeroHashChar("wtnhxymk", start)
-            val i = index.toInt - 48
-            if (i < 8 && out.charAt(i) == '_') {
-                out = out.substring(0, i) + ch + out.substring(i + 1)
-            }
-            start = res
+    def part1(start: Int, res: Array[Char]): String =
+        if (res.size == 8) res.mkString
+        else {
+            val (num, ch, _) = findZeroHashChar("wtnhxymk", start)
+            part1(num, res :+ ch)
         }
 
-        return out
-    }
+    def part2(start: Int, res: Array[Char]): String =
+        if (res.filter(_ == '_').size == 0) return res.mkString
+        else {
+            val (num, index, ch) = findZeroHashChar("wtnhxymk", start)
+            val i = index.toInt - 48
+            if (i < 8 && res.charAt(i) == '_') {
+                res(i) = ch
+            }
+            part2(num, res)
+        }
 
     def findZeroHashChar
         ( input: String
