@@ -1,5 +1,6 @@
 package advent2016
 
+import scalaadventutils.Grid
 import scalaadventutils.Problem
 
 import scala.collection.mutable.ArrayBuffer

@@ -1,5 +1,7 @@
 package advent2016
 
+import scalaadventutils.GridUtils
+
 import org.scalatest.funsuite.AnyFunSuite
 
 class Day8Spec extends AnyFunSuite {
