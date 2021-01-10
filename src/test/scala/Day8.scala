@@ -37,10 +37,6 @@ class Day8Spec extends AnyFunSuite {
             ".#....."
         )
 
-        println(out.mkString("\n"))
-        println()
-        println(g1.toString())
-
         assert(out.mkString("\n") == g1.toString().trim())
 
         line = "rotate row y=0 by 4"
