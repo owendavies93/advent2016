@@ -6,7 +6,7 @@ import annotation.tailrec
 import scala.collection.immutable.Queue
 
 object Day11 {
-    type FloorMap = Map[Int, (Set[Generator], Set[Microchip])]
+    type FloorMap = Map[Int, (Set[Item])]
 
     val parser = """(\w+)(?:-compatible)? (generator|microchip)""".r
 
@@ -18,6 +18,12 @@ object Day11 {
     def part1() = solve(parseInput(Problem.parseInputToList("day11")))
 
     def part2() = solve(parseInput(Problem.parseInputToList("day11-2")))
+
+    def getGensAndChips(items: Set[Item]) =
+        (items.filter(_.isInstanceOf[Generator])
+              .map(_.asInstanceOf[Generator]).toSet,
+         items.filter(_.isInstanceOf[Microchip])
+              .map(_.asInstanceOf[Microchip]).toSet)
 
     def solve(state: Floors): Int = {
         @tailrec
@@ -46,7 +52,7 @@ object Day11 {
             val chips = items.filter(i => i(1) == "microchip")
                              .map(i => new Microchip(i(0).split("-")(0)))
                              .toSet
-            (i, (gens, chips))
+            (i, (gens ++ chips))
         }).toMap
 
         new Floors(1, floorMap, 0)
@@ -61,50 +67,32 @@ class Floors
 
     def valid(): Boolean = {
         val v = floors.keys.toList.map(k => {
-            val (gens, chips) = floors(k)
+            val (gens, chips) = Day11.getGensAndChips(floors(k))
             gens.isEmpty || !chips.exists(c => !gens.exists(_.elem == c.elem))
         })
         v.forall(_ == true)
     }
 
     def complete(): Boolean =
-        floors.keys.filter(_ < floors.keys.size)
-              .forall(k => (floors(k)._1 ++ floors(k)._2).isEmpty)
+        floors.keys.filter(_ < floors.keys.size).forall(k => floors(k).isEmpty)
 
     def next(): List[Floors] = {
-        val items = floors(elevator)._1.toList ++ floors(elevator)._2
+        val items = floors(elevator).toList
         val combs = items.zipWithIndex.combinations(2).toList ++
                     items.zipWithIndex.combinations(1)
 
         List(-1, 1).flatMap(d => {
-            combs.map(c => {
-                val actuals = c.map(_._1)
-                val gens  = actuals.filter(_.isInstanceOf[Generator])
-                                   .map(_.asInstanceOf[Generator]).toSet
-
-                val chips = actuals.filter(_.isInstanceOf[Microchip])
-                                   .map(_.asInstanceOf[Microchip]).toSet
-
-                step(d, gens, chips)
-            })
+            combs.map(c => step(d, c.map(_._1)))
         }).filter(_ != None).map(_.get)
     }
 
-    def step
-        ( change: Int
-        , gens: Set[Generator]
-        , chips: Set[Microchip])
-        : Option[Floors] = {
-
+    def step(change: Int, items: List[Item]): Option[Floors] = {
         val newFloor = elevator + change
         if (newFloor < 1 || newFloor > floors.keys.size) None
         else {
             val newMap: Day11.FloorMap = floors
-                .updated(elevator,
-                    (floors(elevator)._1 -- gens, floors(elevator)._2 -- chips)
-                ).updated(newFloor,
-                    (floors(newFloor)._1 ++ gens, floors(newFloor)._2 ++ chips)
-                )
+                .updated(elevator, floors(elevator) -- items)
+                .updated(newFloor, floors(newFloor) ++ items)
 
             val newState = new Floors(newFloor, newMap, steps + 1)
             if (newState.valid()) Some(newState) else None
@@ -121,7 +109,7 @@ class Floors
     }
 
     override def hashCode() = floors.keys.map(
-        k => 31 * k * (floors(k)._1.toList ++ floors(k)._2).map(_.hashCode()).sum
+        k => 31 * k * floors(k).map(_.hashCode()).sum
     ).sum
 
     override def toString(): String = {
@@ -129,7 +117,7 @@ class Floors
         for (f <- floors.keys.toList.sorted.reverse) {
             sb.append("F" + f.toString)
             sb.append(if (elevator == f) " E " else " . ")
-            sb.append((floors(f)._1.toList ++ floors(f)._2).mkString(" "))
+            sb.append(floors(f).mkString(" "))
             sb.append("\n")
         }
 

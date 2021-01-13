@@ -6,45 +6,45 @@ import scalaadventutils.Problem
 
 class Day11Spec extends AnyFunSuite {
     val floorMap = Map(
-        1 -> (Set[Generator](), Set[Microchip](new Microchip("hydrogen"), new Microchip("lithium"))),
-        2 -> (Set[Generator](new Generator("hydrogen")), Set[Microchip]()),
-        3 -> (Set[Generator](new Generator("lithium")), Set[Microchip]()),
-        4 -> (Set[Generator](), Set[Microchip]())
+        1 -> (Set[Item](new Microchip("hydrogen"), new Microchip("lithium"))),
+        2 -> (Set[Item](new Generator("hydrogen"))),
+        3 -> (Set[Item](new Generator("lithium"))),
+        4 -> (Set[Item]())
     )
 
     val completeFloorMap = Map(
-        1 -> (Set[Generator](), Set[Microchip]()),
-        2 -> (Set[Generator](), Set[Microchip]()),
-        3 -> (Set[Generator](), Set[Microchip]()),
-        4 -> (Set[Generator](), Set[Microchip](new Microchip("hydrogen"), new Microchip("lithium")))
+        1 -> (Set[Item]()),
+        2 -> (Set[Item]()),
+        3 -> (Set[Item]()),
+        4 -> (Set[Item](new Microchip("hydrogen"), new Microchip("lithium")))
     )
 
     val completeFloorMap2 = Map(
-        1 -> (Set[Generator](), Set[Microchip]()),
-        2 -> (Set[Generator](), Set[Microchip]()),
-        3 -> (Set[Generator](), Set[Microchip]()),
-        4 -> (Set[Generator](new Generator("hydrogen")), Set[Microchip](new Microchip("lithium")))
+        1 -> (Set[Item]()),
+        2 -> (Set[Item]()),
+        3 -> (Set[Item]()),
+        4 -> (Set[Item](new Generator("hydrogen"), new Microchip("lithium")))
     )
 
     val invalidFloorMap = Map(
-        1 -> (Set[Generator](), Set[Microchip]()),
-        2 -> (Set[Generator](new Generator("lithium")), Set[Microchip](new Microchip("lithium"))),
-        3 -> (Set[Generator](), Set[Microchip]()),
-        4 -> (Set[Generator](new Generator("lithium")), Set[Microchip](new Microchip("hydrogen")))
+        1 -> (Set[Item]()),
+        2 -> (Set[Item](new Generator("lithium"), new Microchip("lithium"))),
+        3 -> (Set[Item]()),
+        4 -> (Set[Item](new Generator("lithium"), new Microchip("hydrogen")))
     )
 
     val validFloorMap = Map(
-        1 -> (Set[Generator](), Set[Microchip]()),
-        2 -> (Set[Generator](new Generator("lithium")), Set[Microchip](new Microchip("lithium"))),
-        3 -> (Set[Generator](), Set[Microchip](new Microchip("hydrogen"))),
-        4 -> (Set[Generator](new Generator("hydrogen")), Set[Microchip](new Microchip("hydrogen")))
+        1 -> (Set[Item]()),
+        2 -> (Set[Item](new Generator("lithium"), new Microchip("lithium"))),
+        3 -> (Set[Item](new Microchip("hydrogen"))),
+        4 -> (Set[Item](new Generator("hydrogen"), new Microchip("hydrogen")))
     )
 
     val floorMap2 = Map(
-        1 -> (Set[Generator](), Set[Microchip](new Microchip("lithium"))),
-        2 -> (Set[Generator](), Set[Microchip]()),
-        3 -> (Set[Generator](new Generator("hydrogen"), new Generator("lithium")), Set[Microchip](new Microchip("hydrogen"))),
-        4 -> (Set[Generator](), Set[Microchip]())
+        1 -> (Set[Item](new Microchip("lithium"))),
+        2 -> (Set[Item]()),
+        3 -> (Set[Item](new Generator("hydrogen"), new Generator("lithium"), new Microchip("hydrogen"))),
+        4 -> (Set[Item]())
     )
 
     test("Items: equality") {
@@ -103,11 +103,7 @@ class Day11Spec extends AnyFunSuite {
         val floors = Day11.parseInput(lines).floors
 
         assertResult(2) {
-            floors(1)._2.size
-        }
-
-        assertResult(0) {
-            floors(1)._1.size
+            floors(1).size
         }
     }
 
