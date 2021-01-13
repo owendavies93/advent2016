@@ -59,13 +59,11 @@ class Floors
     , val steps: Int
     ) extends Equals {
 
-    def valid(): Boolean = {
-        val v = floors.keys.toList.map(k => {
+    def valid(): Boolean =
+        floors.keys.toList.forall(k => {
             val (gens, chips) = floors(k)
             gens.isEmpty || !chips.exists(c => !gens.exists(_.elem == c.elem))
         })
-        v.forall(_ == true)
-    }
 
     def complete(): Boolean =
         floors.keys.filter(_ < floors.keys.size)
