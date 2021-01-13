@@ -2,7 +2,8 @@ package advent2016
 
 import scalaadventutils.Problem
 
-import scala.collection.mutable.Queue
+import annotation.tailrec
+import scala.collection.immutable.Queue
 
 object Day11 {
     type FloorMap = Map[Int, (Set[Generator], Set[Microchip])]
@@ -10,34 +11,26 @@ object Day11 {
     val parser = """(\w+)(?:-compatible)? (generator|microchip)""".r
 
     def main(args: Array[String]) {
-        val input = Problem.parseInputToList("day11")
-        println(solve(parseInput(input)))
-
-        val input2 = Problem.parseInputToList("day11-2")
-        println(solve(parseInput(input2)))
+        println(part1())
+        println(part2())
     }
 
+    def part1() = solve(parseInput(Problem.parseInputToList("day11")))
+
+    def part2() = solve(parseInput(Problem.parseInputToList("day11-2")))
+
     def solve(state: Floors): Int = {
-        val q = Queue[Floors](state)
-        val seen = collection.mutable.Set[Floors](state)
-
-        while (!q.isEmpty) {
-            val current = q.dequeue()
-
+        @tailrec
+        def solve_(current: Floors, q: Queue[Floors], seen: Set[Floors]): Int = {
             if (current.complete()) return current.steps
             else {
-                val next = current.next()
-
-                for (n <- next) {
-                    if (!seen.contains(n)) {
-                        q += n
-                        seen += n
-                    }
-                }
+                val next = current.next().filter(!seen.contains(_))
+                val (current_, q_) = q.enqueue(next).dequeue
+                solve_(current_, q_, seen ++ next)
             }
         }
 
-        return -1
+        solve_(state, Queue[Floors](state), Set[Floors](state))
     }
 
     def parseInput(lines: List[String]): Floors = {
