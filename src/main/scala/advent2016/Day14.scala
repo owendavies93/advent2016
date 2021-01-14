@@ -23,9 +23,7 @@ object Day14 {
             else
                 getNext(
                     Stream.from(i + 1).dropWhile(n => {
-                        val hash = if (isStretch) stretch(base + n.toString)
-                                   else md5(base + n.toString)
-                        val c = hasTriple(hash)
+                        val c = hasTriple(md5(base + n.toString, isStretch))
                         c == '-' || !checkQuint(n, base, c, isStretch)
                     })(0), count + 1
                 )
@@ -49,10 +47,8 @@ object Day14 {
                 return false
             }
 
-            val hash = if (isStretch) stretch(base + i.toString)
-                       else md5(base + i.toString)
-
-            if (hash.contains(substr)) true else check(i + 1)
+            if (md5(base + i.toString, isStretch).contains(substr)) true
+            else check(i + 1)
         }
         check(start + 1)
     }
@@ -62,23 +58,7 @@ object Day14 {
         case None    => '-'
     }
 
-    def md5(x: String): String = {
-        if (cache.contains(x)) {
-            cache(x)
-        } else {
-            val res = Hashing.md5AsString(x)
-            cache += (x -> res)
-            res
-        }
-    }
-
-    def stretch(x: String): String = {
-        if (sCache.contains(x)) {
-            sCache(x)
-        } else {
-            val res = Hashing.md5Multi(x, 2017)
-            sCache += (x -> res)
-            res
-        }
-    }
+    def md5(x: String, isStretch: Boolean) =
+        if (isStretch) sCache.getOrElseUpdate(x, Hashing.md5Multi(x, 2017))
+        else cache.getOrElseUpdate(x, Hashing.md5AsString(x))
 }
