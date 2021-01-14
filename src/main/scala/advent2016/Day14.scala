@@ -1,12 +1,12 @@
 package advent2016
 
+import scalaadventutils.Hashing
+
 import annotation.tailrec
-import java.security.MessageDigest
 import scala.collection.mutable.Map
 
 object Day14 {
 
-    val digest = MessageDigest.getInstance("MD5")
     val triple = """(\w)\1\1""".r
     val cache  = Map[String, String]()
     val sCache = Map[String, String]()
@@ -66,7 +66,7 @@ object Day14 {
         if (cache.contains(x)) {
             cache(x)
         } else {
-            val res = digest.digest(x.getBytes).map("%02x".format(_)).mkString
+            val res = Hashing.md5AsString(x)
             cache += (x -> res)
             res
         }
@@ -76,10 +76,7 @@ object Day14 {
         if (sCache.contains(x)) {
             sCache(x)
         } else {
-            var res = x
-            for (i <- 0 until 2017) {
-                res = digest.digest(res.getBytes).map("%02x".format(_)).mkString
-            }
+            val res = Hashing.md5Multi(x, 2017)
             sCache += (x -> res)
             res
         }
