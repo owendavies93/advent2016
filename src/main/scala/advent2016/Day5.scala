@@ -1,16 +1,17 @@
 package advent2016
 
-import java.security.MessageDigest
+import scalaadventutils.Hashing
+
+import annotation.tailrec
 
 object Day5 {
-
-    val digest = MessageDigest.getInstance("MD5")
 
     def main(args: Array[String]) {
         println(part1(1, Array[Char]()))
         println(part2(1, Array.fill(8)('_')))
     }
 
+    @tailrec
     def part1(start: Int, res: Array[Char]): String =
         if (res.size == 8) res.mkString
         else {
@@ -18,6 +19,7 @@ object Day5 {
             part1(num, res :+ ch)
         }
 
+    @tailrec
     def part2(start: Int, res: Array[Char]): String =
         if (res.filter(_ == '_').size == 0) return res.mkString
         else {
@@ -34,20 +36,9 @@ object Day5 {
         , start: Int
         , length: Int = 5): (Int, Char, Char)  = {
 
-        val res = Stream.from(start + 1).dropWhile(i => {
-            val hash = md5(input + i.toString)
-            // Avoid string conversion of the hash to improve speed
-            // A byte is the first two characters of the string, so
-            // just check the 2.5 first bytes
-            hash(0) != 0 || hash(1) != 0 || (hash(2) & 0xF0) != 0
-        })(0)
-
-        val chars = md5(input + res.toString)
-                        .map("%02x".format(_))
-                        .mkString.slice(length, length + 2)
+        val res = Hashing.findHashWithLeadingChars(input, start, length, 0)
+        val chars = Hashing.md5AsString(input + res.toString)
+                           .slice(length, length + 2)
         (res, chars(0), chars(1))
     }
-
-    private def md5(input: String): Array[Byte] =
-        digest.digest(input.getBytes)
 }
