@@ -2,8 +2,8 @@ package advent2016
 
 import scalaadventutils.Hashing
 
-import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.Queue
+import annotation.tailrec
+import scala.collection.immutable.Queue
 
 object Day17 {
     import advent2016.Dir._
@@ -22,7 +22,8 @@ object Day17 {
 
     def part1() = getPath(new Point(0, 0), new Point(3, 3), "rrrbmfta")(0)
 
-    def part2() = getPath(new Point(0, 0), new Point(3, 3), "rrrbmfta").last.size
+    def part2() =
+        getPath(new Point(0, 0), new Point(3, 3), "rrrbmfta").last.size
 
     def getPath
         ( p: Point
@@ -30,25 +31,31 @@ object Day17 {
         , start: String)
         : List[String] = {
 
-        val q = Queue[(Point, List[Point], List[Dir.Value])]((p, List(p), List()))
-        val res = ListBuffer[String]()
+        @tailrec
+        def getPath_
+            ( q: Queue[(Point, List[Point], List[Dir.Value])]
+            , res: List[String])
+            : List[String] = {
 
-        while (!q.isEmpty) {
-            val (p_, path, dirs) = q.dequeue
+            if (q.isEmpty) return res
+            else {
+                val ((p_, path, dirs), q_) = q.dequeue
+                val next = getValidMoves(p_, start + dirs.mkString)
 
-            // Grim
-            def update(n: (Point, Dir.Value)): Unit = {
-                if (n._1 == target) {
-                    res += (dirs :+ n._2).mkString
-                } else {
-                    q += ((n._1, path :+ n._1, dirs :+ n._2))
-                }
+                val hits  = next.filter(n => n._1 == target)
+                                .map(n => (dirs :+ n._2).mkString).toList
+
+                val toRun = next.filter(n => n._1 != target)
+                                .map(n => (n._1, path :+ n._1, dirs :+ n._2))
+
+                getPath_(q_.enqueue(toRun), res ++ hits)
             }
-
-            for (n <- getValidMoves(p_, start + dirs.mkString)) update(n)
         }
 
-        res.toList
+        getPath_(
+            Queue[(Point, List[Point], List[Dir.Value])]((p, List(p), List())),
+            List[String]()
+        )
     }
 
     def getValidMoves(p: Point, pass: String): List[(Point, Dir.Value)] =
