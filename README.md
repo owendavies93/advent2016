@@ -9,4 +9,4 @@ Run `sbt test` to run the tests, after installing
 [sbt](https://www.scala-sbt.org/).
 
 TODO:
-* [ ] Improve performance of Day 18 Part 2
+* [*] Improve performance of Day 18 Part 2
