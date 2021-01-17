@@ -3,50 +3,40 @@ package advent2016
 import scalaadventutils.CellulaAutomata
 import scalaadventutils.Problem
 
+import annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
 object Day18 {
 
     def main(args: Array[String]) {
         val start = Problem.parseInputToString("day18")
-        val tr = fromString(start)
+        val ca = fromString(start)
 
-        println(tr.grid.size * 40 - getOn(tr, 40))
-        println(tr.grid.size * 400000 - getOn(tr, 400000))
+        println(ca.grid.size * 40 - getOn(ca, 40))
+        println(ca.grid.size * 400000 - getOn(ca, 400000))
     }
 
-    def getOn(tr: TileRow, rows: Int): Int =
-        (1 until rows).foldLeft(tr)((next, i) => next.getNext()).countOn()
-
-    private def fromString(input: String) = {
-        val b = ArrayBuffer(input.map(_ == '^'): _*)
-        new TileRow(b, b.size, 1)
-    }
-}
-
-class TileRow
-    ( grid: ArrayBuffer[Boolean]
-    , width: Int
-    , height: Int
-    ) extends CellulaAutomata(grid, width, height) {
-
-    def getNext(): TileRow = {
-
-        def stepFn(x: Int, y: Int): Boolean = {
-            val ns = neighbours(x, y).map(n => get(n._1, n._2))
-            ns(0) != ns(2)
+    def getOn(ca: CellulaAutomata, rows: Int): Int = {
+        @tailrec
+        def getOn_(c: CellulaAutomata, i: Int, total: Int): Int = {
+            if (i == rows) total
+            else {
+                def stepFn(x: Int, y: Int): Boolean = {
+                    val ns = (-1 to 1).map(n => (x + n, y)).map(n => {
+                        c.get(n._1, n._2)
+                    })
+                    ns(0) != ns(2)
+                }
+                getOn_(c.step(stepFn), i + 1, total + c.countOn)
+            }
         }
 
-        step(stepFn)
+        getOn_(ca, 0, 0)
     }
 
-    override def neighbours(x: Int, y: Int) =
-        (-1 to 1).map(n => (x + n, y - 1)).toList
-
-    override def step(stepFn: (Int, Int) => Boolean): TileRow = {
-        val nextGrid = grid ++ ArrayBuffer(
-            (0 until width).map(x => stepFn(x, height)): _*
-        )
-        new TileRow(nextGrid, width, height + 1)
+    private def fromString(input: String): CellulaAutomata = {
+        val b = ArrayBuffer(input.map(_ == '^'): _*)
+        new CellulaAutomata(b, b.size, 1)
     }
 }
+
