@@ -4,15 +4,17 @@ import scalaadventutils.Problem
 
 import org.scalatest.funsuite.AnyFunSuite
 
-class Day12Spec extends AnyFunSuite {
+class AssembunnySpec extends AnyFunSuite {
 
-    test("Day 12: run") {
+    test("Assembunny: run") {
         val input = Problem.parseInputToList("day12-test")
 
-        val out = Day12.run(input)
+        val m = Map("a" -> 0, "b" -> 0, "c" -> 0, "d" -> 0)
+        val a = new Assembunny(m)
+        val out = a.run(input)
+
         assertResult(42) {
             out("a")
         }
     }
-
 }
