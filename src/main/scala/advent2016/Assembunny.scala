@@ -12,8 +12,15 @@ class Assembunny(init: Map[String, Int]) {
     val numeric = """-?\d+""".r
 
     def run(lines: List[String]): Machine = {
+        val parsed = lines.map(parseLine)
+
         @tailrec
-        def run_(regs: Machine, ptr: Int, comms: List[String]): Machine = {
+        def run_
+            ( regs: Machine
+            , ptr: Int
+            , comms: List[List[String]])
+            : Machine = {
+
             if (ptr < 0 || ptr >= comms.size) regs
             else {
                 val (regs_, ptr_, comms_) = step(regs, ptr, comms)
@@ -21,7 +28,7 @@ class Assembunny(init: Map[String, Int]) {
             }
         }
 
-        run_(init, 0, lines)
+        run_(init, 0, parsed)
     }
 
     private def parseLine(line: String): List[String] = line.split(" ").toList
@@ -29,10 +36,10 @@ class Assembunny(init: Map[String, Int]) {
     private def step
         ( regs: Machine
         , ptr: Int
-        , comms: List[String])
-        : (Machine, Int, List[String]) = {
+        , comms: List[List[String]])
+        : (Machine, Int, List[List[String]]) = {
 
-        val cmd :: args = parseLine(comms(ptr))
+        val cmd :: args = comms(ptr)
 
         try {
             cmd match {
@@ -75,15 +82,12 @@ class Assembunny(init: Map[String, Int]) {
                 case "tgl" => {
                     val index = ptr + regs(args(0))
                     if (index >= 0 && index < comms.size) {
-                        val c :: a = parseLine(comms(index))
+                        val c :: a = comms(index)
                         (regs, ptr + 1, comms.updated(index,
                             a.size match {
-                                case 1 => (
-                                    (if (c == "inc") "dec" else "inc") :: a
-                                ).mkString(" ")
-                                case 2 => (
-                                    (if (c == "jnz") "cpy" else "jnz") :: a
-                                ).mkString(" ")
+                                case 1 => (if (c == "inc") "dec" else "inc") :: a
+
+                                case 2 => (if (c == "jnz") "cpy" else "jnz") :: a
                             }
                         ))
                     } else {
