@@ -26,23 +26,34 @@ class Assembunny(init: Map[String, Int]) {
 
     private def parseLine(line: String): List[String] = line.split(" ").toList
 
-    private def step(regs: Machine, ptr: Int, comms: List[String]): (Machine, Int, List[String]) = {
+    private def step
+        ( regs: Machine
+        , ptr: Int
+        , comms: List[String])
+        : (Machine, Int, List[String]) = {
+
         val cmd :: args = parseLine(comms(ptr))
 
         try {
             cmd match {
                 case "cpy" => args(0) match {
-                    case numeric(_*) => (regs.updated(args(1), args(0).toInt), ptr + 1, comms)
-                    case _           => (regs.updated(args(1), regs(args(0))), ptr + 1, comms)
+                    case numeric(_*) =>
+                        (regs.updated(args(1), args(0).toInt), ptr + 1, comms)
+                    case _ =>
+                        (regs.updated(args(1), regs(args(0))), ptr + 1, comms)
                 }
-                case "inc" => (regs.updated(args(0), regs(args(0)) + 1), ptr + 1, comms)
-                case "dec" => (regs.updated(args(0), regs(args(0)) - 1), ptr + 1, comms)
+                case "inc" =>
+                    (regs.updated(args(0), regs(args(0)) + 1), ptr + 1, comms)
+                case "dec" =>
+                    (regs.updated(args(0), regs(args(0)) - 1), ptr + 1, comms)
                 case "jnz" => args(0) match {
                     case numeric(_*) => {
                         if (args(0).toInt != 0) {
                             args(1) match {
-                                case numeric(_*) => (regs, ptr + args(1).toInt, comms)
-                                case _           => (regs, ptr + regs(args(1)), comms)
+                                case numeric(_*) =>
+                                    (regs, ptr + args(1).toInt, comms)
+                                case _ =>
+                                    (regs, ptr + regs(args(1)), comms)
                             }
                         } else {
                             (regs, ptr + 1, comms)
@@ -51,8 +62,10 @@ class Assembunny(init: Map[String, Int]) {
                     case _ => {
                         if (regs(args(0)) != 0) {
                             args(1) match {
-                                case numeric(_*) => (regs, ptr + args(1).toInt, comms)
-                                case _           => (regs, ptr + regs(args(1)), comms)
+                                case numeric(_*) =>
+                                    (regs, ptr + args(1).toInt, comms)
+                                case _ =>
+                                    (regs, ptr + regs(args(1)), comms)
                             }
                         } else {
                             (regs, ptr + 1, comms)
@@ -65,8 +78,12 @@ class Assembunny(init: Map[String, Int]) {
                         val c :: a = parseLine(comms(index))
                         (regs, ptr + 1, comms.updated(index,
                             a.size match {
-                                case 1 => ((if (c == "inc") "dec" else "inc") :: a).mkString(" ")
-                                case 2 => ((if (c == "jnz") "cpy" else "jnz") :: a).mkString(" ")
+                                case 1 => (
+                                    (if (c == "inc") "dec" else "inc") :: a
+                                ).mkString(" ")
+                                case 2 => (
+                                    (if (c == "jnz") "cpy" else "jnz") :: a
+                                ).mkString(" ")
                             }
                         ))
                     } else {
