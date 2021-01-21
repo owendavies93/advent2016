@@ -10,3 +10,5 @@ Run `sbt test` to run the tests, after installing
 
 TODO:
 * [x] Improve performance of Day 18 Part 2
+* [ ] Improve neatness of Assembunny code (especially output tracking)
+* [ ] Improve immutability
