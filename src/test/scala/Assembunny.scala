@@ -6,7 +6,6 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class AssembunnySpec extends AnyFunSuite {
 
-/*
     test("Assembunny: run") {
         val input = Problem.parseInputToList("day12-test")
 
@@ -18,7 +17,7 @@ class AssembunnySpec extends AnyFunSuite {
             out("a")
         }
     }
-*/
+
     test("Assembunny: run with toggle") {
         val input = Problem.parseInputToList("day23-test")
 
