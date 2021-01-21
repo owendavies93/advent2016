@@ -11,6 +11,8 @@ class Assembunny(init: Map[String, Int]) {
 
     val numeric = """-?\d+""".r
 
+    var capturedOutput = List[Int]()
+
     def run(lines: List[String]): Machine = {
         val parsed = lines.map(parseLine)
 
@@ -29,6 +31,44 @@ class Assembunny(init: Map[String, Int]) {
         }
 
         run_(init, 0, parsed)
+    }
+
+    def runWithOutputCheck(lines: List[String]): Int = {
+        val parsed = lines.map(parseLine)
+        val maxRuns = 100000
+
+        def runWithOutputCheck_
+            ( regs: Machine
+            , ptr: Int
+            , comms: List[List[String]]
+            , inc: Int)
+            : Boolean = {
+
+            if (ptr < 0 || ptr >= comms.size) false
+            else {
+                val (regs_, ptr_, comms_) = step(regs, ptr, comms)
+
+                if (inc > maxRuns) {
+                    false
+                } else if (capturedOutput.size < 2) {
+                    runWithOutputCheck_(regs_, ptr_, comms_, inc + 1)
+                } else {
+                    val last = capturedOutput.last
+                    if (last < 2 && last == 1 - capturedOutput.init.last) {
+                        if (capturedOutput.size > 10) true
+                        else runWithOutputCheck_(regs_, ptr_, comms_, inc + 1)
+                    } else {
+                        false
+                    }
+                }
+            }
+        }
+
+        Stream.from(1).dropWhile(i => {
+            val m = init.updated("a", i)
+            capturedOutput = List[Int]()
+            !runWithOutputCheck_(m, 0, parsed, 0)
+        })(0)
     }
 
     private def parseLine(line: String): List[String] = line.split(" ").toList
@@ -93,6 +133,10 @@ class Assembunny(init: Map[String, Int]) {
                     } else {
                         (regs, ptr + 1, comms)
                     }
+                }
+                case "out" => {
+                    capturedOutput = capturedOutput :+ regs(args(0))
+                    (regs, ptr + 1, comms)
                 }
             }
         } catch {
