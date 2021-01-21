@@ -14,6 +14,7 @@ object Day24 {
     type PointMap = Map[Int, Point]
 
     val numeric = """\d""".r
+    val cache = Map[(Point, Point), Int]()
 
     def main(args: Array[String]) {
         val input = Problem.parseInputToList("day24")
@@ -21,41 +22,19 @@ object Day24 {
         println(part2(input))
     }
 
-    def part1(input: List[String]): Int = {
-        val (grid, points) = constructGrid(input)
-        val g = new WeightedUndirectedGraph[Point](constructGraph(grid))
-        val start = points(0)
+    def part1(input: List[String]) = getMinPath(input, false)
 
-        points.retain((k, v) => k != 0).values.toList.permutations.map(p =>
-            (start :: p).sliding(2).map(s =>
-                Dijkstra.shortestPathTotalWeight(
-                    g, Dijkstra.shortestPath(g, s(0), s(1))
-                )
-            ).sum
-        ).min
-    }
-
-    def part2(input: List[String]): Int = {
-        val (grid, points) = constructGrid(input)
-        val g = new WeightedUndirectedGraph[Point](constructGraph(grid))
-        val start = points(0)
-
-        points.retain((k, v) => k != 0).values.toList.permutations.map(p =>
-            ((start :: p) :+ start).sliding(2).map(s =>
-                Dijkstra.shortestPathTotalWeight(
-                    g, Dijkstra.shortestPath(g, s(0), s(1))
-                )
-            ).sum
-        ).min
-    }
+    def part2(input: List[String]) = getMinPath(input, true)
 
     def constructGraph(grid: Grid) =
         (0 until grid.height).flatMap(y => {
             (0 until grid.width).map(x => {
-                val openNeighbours =
+                (
+                    (x, y),
                     grid.nonDiagNeighbours(x, y)
                         .filter(n => grid.get(n._1, n._2) == true)
-                ((x, y), openNeighbours.map((_, 1)).toMap)
+                        .map((_, 1)).toMap
+                )
             })
         }).toMap
 
@@ -78,4 +57,35 @@ object Day24 {
         (new Grid(buf, width, height), pointMap)
     }
 
+    private def getMinPath(input: List[String], goHome: Boolean): Int = {
+        cache.clear()
+        val (grid, points) = constructGrid(input)
+        val g = new WeightedUndirectedGraph[Point](constructGraph(grid))
+        val start = points(0)
+
+        points.retain((k, v) => k != 0).values.toList.permutations.map(p => {
+            val route = (if (goHome) ((start :: p) :+ start) else (start :: p))
+            route.sliding(2).map(s => shortestPath(s(0), s(1), g)).sum
+        }).min
+    }
+
+    private def shortestPath
+        ( from: Point
+        , to: Point
+        , g: WeightedUndirectedGraph[Point]): Int = {
+
+        if (cache contains (from, to)) {
+            cache((from, to))
+        } else if (cache contains (to, from)) {
+            cache((to, from))
+        } else {
+            val path = Dijkstra.shortestPathTotalWeight(
+                g, Dijkstra.shortestPath(g, from, to)
+            )
+
+            cache += ((from, to) -> path)
+            cache += ((to, from) -> path)
+            path
+        }
+    }
 }
